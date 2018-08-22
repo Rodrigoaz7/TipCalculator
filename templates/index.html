@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Tip$</title>
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+	<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+	<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+	<style type="text/css">
+	.container-fluid{margin-top: 5%;}
+	body{
+		background-color: rgb(215, 215, 215);
+		margin: 0 auto;
+		text-align: center;
+	}
+	#custom-handle, #custom-handle2 {
+    	width: 3em;
+    	height: 1.6em;
+    	text-align: center;
+  	}
+  	.form-control{width: 40%; margin: 0 auto;}
+
+  	</style>
+</head>
+
+<script>
+	$( function() {
+    var handle = $( "#custom-handle" );
+    var handle2 = $( "#custom-handle2" );
+
+    $("#slider").slider({
+      min: 0,
+      max: 10,
+      step: 0.1,
+      create: function() {
+        handle.text( $( this ).slider( "value" ) );
+      },
+      slide: function( event, ui ) {
+        handle.text( ui.value );
+      }
+    });
+
+    $("#slider2").slider({
+      min: 0,
+      max: 10,
+      step: 0.1,
+      create: function() {
+        handle2.text( $( this ).slider( "value" ) );
+      },
+      slide: function( event, ui ) {
+        handle2.text( ui.value );
+      }
+    });
+
+  });
+</script>
+
+<body>
+	<div class="container-fluid">
+		<form id="form" class="form-group">
+			<h2 class="form-signin-heading">Calculate the tip</h2>
+			<div class="form-group">
+			    <label for="conta">Total ($)</label>
+			    <input type="text" class="form-control" id="conta" placeholder="Conta total em $">
+			  </div>
+
+			 <label for="slider">Quality score</label>
+			<div id="slider" class="form-control">
+				<div id="custom-handle" class="ui-slider-handle"></div>
+			</div>
+
+			<br>
+
+			 <label for="slider2">Quality score</label>
+			<div id="slider2" class="form-control">
+				<div id="custom-handle2" class="ui-slider-handle"></div>
+			</div>
+
+			<br>
+			
+			<button type="submit" name="enviar" id="enviar" class="btn btn-primary">Enviar</button>
+		</form>
+	</div>
+
+	<!-- Modal -->
+	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="exampleModalLabel">DONE $$$</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body" id="modaltext">
+	     
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+</body>
+</html>
+
+<script>
+    $("form").submit(function(event){
+    	var json = {
+    		"nota_qualidade": $("#custom-handle")[0].innerHTML,
+    		"nota_servico": $("#custom-handle2")[0].innerHTML
+    	}
+    	let conta = this.conta.value;
+    	$.ajax({
+			method:"POST",
+			url: "http://localhost:8000/decider",
+	    	data: JSON.stringify(json), //Função para transformar o objeto em JSON
+	    	contentType: 'application/json; charset=utf-8',
+			dataType: "json",
+	    	success: function(data) {
+	    		$("#modaltext").html("You should to pay " + data.toFixed(2) + "% of the account as tip, or $ " + (conta*(data/100.0)).toFixed(2));
+	    		$("#exampleModal").modal('show');
+	        	console.log("You should to pay " + data.toFixed(2) + "% of the account as tip, or $ " + (conta*(data/100.0)).toFixed(2));
+	    	},
+	    	error: function(data) {
+	    		console.log(data);
+	    	}
+		});
+    	event.preventDefault();
+    });
+</script>
